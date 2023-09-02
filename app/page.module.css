@@ -1,0 +1,9 @@
+.title {
+  display: flex;
+  align-items:baseline;
+}
+
+.title h2 {
+  font-size: medium;
+  margin-left: 10px;
+}
