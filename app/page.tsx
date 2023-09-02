@@ -21,8 +21,8 @@ export default function Home() {
     getPointList(firestoreDb)
   }, []);
 
-  async function getPointList(db) {
-    const allPoints = [];
+  async function getPointList(db:any) {
+    const allPoints:any = [];
     // コレクション内のすべてのドキュメントを取得
     const querySnapshot = await getDocs(collection(db, "point"));
     querySnapshot.forEach((doc) => {
@@ -55,7 +55,7 @@ export default function Home() {
       {/* ポイント獲得表 */}
       <div>
         <ul>
-          {pointList.map((data, index) => (
+          {pointList.map((data:any, index) => (
             <li key={index}>{data.name}</li>
           ))}
         </ul>
