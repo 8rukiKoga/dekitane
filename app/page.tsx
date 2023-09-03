@@ -6,23 +6,26 @@ import firebaseConfig from '../lib/firebase';
 import { useEffect, useState } from 'react';
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, getDocs, getDoc, query } from 'firebase/firestore';
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, Firestore, updateDoc } from 'firebase/firestore';
 
 
 export default function Home() {
+  // 状態変数宣言
   const [totalPoint, setTotalPoint] = useState(0);
   const [pointList, setPointList] = useState([]);
 
+  // firebase初期化
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
   // マウント時にDBと同期
   useEffect(() => {
-    const app = initializeApp(firebaseConfig);
-    const firestoreDb = getFirestore(app);
-
-    getPointList(firestoreDb)
+    getTotalPoint()
+    getPointList()
   }, []);
 
   // ポイントリスト取得
-  async function getPointList(db: any) {
+  async function getPointList() {
     const allPoints: any = [];
     // コレクション内のすべてのドキュメントを取得
     const querySnapshot = await getDocs(collection(db, "point"));
@@ -30,6 +33,30 @@ export default function Home() {
       allPoints.push(doc.data())
     });
     setPointList(allPoints)
+  }
+
+  // トータルポイント取得
+  async function getTotalPoint() {
+    const docRef = doc(db, "users", "shcNXJpe5y5iHyYnpNdV");
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      setTotalPoint(docSnap.data().total_point)
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+    }
+  }
+
+  // ポイント加算
+  async function handleClick(point: number) {
+    const docRef = doc(db, "users", "shcNXJpe5y5iHyYnpNdV");
+    const nextTotalPoint = totalPoint + point;
+
+    await updateDoc(docRef, {
+      total_point: nextTotalPoint
+    })
+    setTotalPoint(nextTotalPoint)
   }
 
   return (
@@ -54,7 +81,7 @@ export default function Home() {
             {pointList.map((data: any, index) => (
               <div className={styles.pointCol}>
                 <li key={index}>{data.name}<span className={styles.caption}>({data.point})</span></li>
-                <button className={styles.button}>達成!</button>
+                <button onClick={() => handleClick(data.point)} className={styles.button}>達成</button>
               </div>
             ))}
           </ul>
