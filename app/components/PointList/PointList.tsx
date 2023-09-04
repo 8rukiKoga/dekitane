@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './pointList.module.css'
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 import { useEffect, useState } from 'react';
 
@@ -10,11 +10,17 @@ import { formatDate } from '../../helpers/formatDate'
 export function PointList(props: any) {
     const [isWeekday, setIsWeekday] = useState(true);
     const [filteredPointList, setFilteredPointList] = useState([]);
+    const initialButtonStates: Record<string, boolean> = {};
+    const [buttonStates, setButtonStates] = useState(initialButtonStates)
 
-    // const today = formatDate(new Date())
+    // 達成ボタンを押した時
+    function handleClick(data: any) {
+        addPoint(data.point)
+        completeTask(data.id)
+    }
 
     // ポイント加算
-    async function handleClick(point: number) {
+    async function addPoint(point: number) {
         const docRef = doc(props.db, "users", "shcNXJpe5y5iHyYnpNdV");
         const nextTotalPoint = props.totalPoint + point;
 
@@ -24,24 +30,42 @@ export function PointList(props: any) {
         props.setTotalPoint(nextTotalPoint)
     }
 
-    // // 今日獲得済みのポイントは獲得できないようにする
-    // function isClickedToday(timestamp:any) {
-    //     const lastGetDate = timestamp.toDate()
+    // 達成→済
+    async function completeTask(id: string) {
+        const docRef = doc(props.db, "point", id);
 
-    //     console.log("今日:" + today)
-    //     console.log("lastGetDate:" + lastGetDate)
+        await updateDoc(docRef, {
+            last_get_date: serverTimestamp()
+        })
+        
+        //ボタンスタイル変更
+        updateButtonStates(id)
+    }
 
-    //     if (today == lastGetDate) {
-    //         return false
-    //     } else {
-    //         return false
-    //     }
-    // }
+    // 今日獲得済みのポイントは獲得できないようにする
+    function isClickedToday(timestamp: any) {
+        const today = formatDate(new Date())
+        const lastGetDate = formatDate(timestamp.toDate())
+        if (today == lastGetDate) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    function updateButtonStates(id: string) {
+        let tmpList = buttonStates
+        setButtonStates(prevButtonStates => ({
+            ...prevButtonStates,
+            [id]: true
+        }));
+    }
 
     // 平日リストと休日リストの出しわけ
     useEffect(() => {
         filterList()
-    }, [isWeekday, props.pointList]);
+        console.log(buttonStates)
+    }, [isWeekday, props.pointList, buttonStates]);
 
     function filterList() {
         let filteredList = [];
@@ -73,9 +97,15 @@ export function PointList(props: any) {
                 <ul>
                     {
                         filteredPointList.map((data: any, index: any) => (
-                            <div className={styles.pointCol}>
-                                <li key={index}>{data.name}<span className={styles.caption}>({data.point})</span></li>
-                                <button onClick={() => handleClick(data.point)} className={styles.button}>達成</button>
+                            <div className={styles.pointCol} key={index}>
+                                <li>{data.name}<span className={styles.caption}>({data.point})</span></li>
+                                <button
+                                    onClick={() => handleClick(data)}
+                                    disabled={buttonStates[data.id] || isClickedToday(data.last_get_date)}
+                                    className={styles.button}
+                                >
+                                    {buttonStates[data.id] || isClickedToday(data.last_get_date) ? "済" : "達成"}
+                                </button>
                             </div>
                         ))
                     }

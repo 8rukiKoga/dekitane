@@ -53,6 +53,13 @@
     border-bottom: none;
 }
 
+.button:disabled {
+    background-color: gray;
+    offset: 2px;
+    transform: translateY(4px);
+    border-bottom: none;
+}
+
 .caption {
     font-size: small;
     font-weight: lighter;

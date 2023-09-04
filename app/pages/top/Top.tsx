@@ -25,18 +25,17 @@ export function Top() {
     getPointList()
   }, []);
 
-  // 平日か休日かでポイントリスト切り替え
-  // useEffect(() => {
-  //   point
-  // }, [myVariable]);
-
   // ポイントリスト取得
   async function getPointList() {
     const allPoints: any = [];
     // コレクション内のすべてのドキュメントを取得
     const querySnapshot = await getDocs(collection(db, "point"));
+
     querySnapshot.forEach((doc) => {
-      allPoints.push(doc.data())
+      // ドキュメントデータ内にidを含めて取得
+      const id = doc.id;
+      const dataWithId = { ...doc.data(), id };
+      allPoints.push(dataWithId);
     });
     setPointList(allPoints)
   }
