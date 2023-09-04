@@ -5,9 +5,13 @@ import { doc, updateDoc } from 'firebase/firestore';
 
 import { useEffect, useState } from 'react';
 
+import { formatDate } from '../../helpers/formatDate'
+
 export function PointList(props: any) {
     const [isWeekday, setIsWeekday] = useState(true);
-    const [filteredPointList, setfilteredPointList] = useState([]);
+    const [filteredPointList, setFilteredPointList] = useState([]);
+
+    // const today = formatDate(new Date())
 
     // ポイント加算
     async function handleClick(point: number) {
@@ -20,14 +24,24 @@ export function PointList(props: any) {
         props.setTotalPoint(nextTotalPoint)
     }
 
+    // // 今日獲得済みのポイントは獲得できないようにする
+    // function isClickedToday(timestamp:any) {
+    //     const lastGetDate = timestamp.toDate()
+
+    //     console.log("今日:" + today)
+    //     console.log("lastGetDate:" + lastGetDate)
+
+    //     if (today == lastGetDate) {
+    //         return false
+    //     } else {
+    //         return false
+    //     }
+    // }
+
     // 平日リストと休日リストの出しわけ
     useEffect(() => {
         filterList()
-    }, [isWeekday]);
-
-    useEffect(() => {
-        filterList()
-    }, [filteredPointList]);
+    }, [isWeekday, props.pointList]);
 
     function filterList() {
         let filteredList = [];
@@ -40,7 +54,10 @@ export function PointList(props: any) {
                 return data.is_weekday == false
             })
         }
-        setfilteredPointList(filteredList)
+        // もし前のバージョンと違う点があれば更新
+        if (filteredPointList != filteredList) {
+            setFilteredPointList(filteredList)
+        }
     }
 
     return (
