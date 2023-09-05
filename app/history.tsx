@@ -1,6 +1,6 @@
 'use client'
 
-import styles from '../css/history.module.css'
+import styles from './css/history.module.css'
 import { useEffect, useState } from "react";
 import { collection, doc, getDocs } from "firebase/firestore";
 import { formatDate } from "../helpers/formatDate";
