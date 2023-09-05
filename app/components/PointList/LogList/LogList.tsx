@@ -7,7 +7,7 @@ export function LogList(props:any) {
                 {
                     props.list.map((data:any) => (
                         <div className={styles.logCol} key={data.id}>
-                            <li>{data.point_name}<span className={styles.caption}>({data.formattedDate})</span></li>
+                            <li>{data.point_name} {data.point}<span className={styles.caption}>({data.formattedDate})</span></li>
                         </div>
                     ))
                 }
