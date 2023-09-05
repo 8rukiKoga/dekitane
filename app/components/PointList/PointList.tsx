@@ -37,7 +37,6 @@ export function PointList(props: any) {
         await updateDoc(docRef, {
             last_get_date: serverTimestamp()
         })
-        
         //ボタンスタイル変更
         updateButtonStates(id)
     }
@@ -52,21 +51,19 @@ export function PointList(props: any) {
             return false
         }
     }
-
-    function updateButtonStates(id: string) {
-        let tmpList = buttonStates
+    function updateButtonStates(id:string) {
         setButtonStates(prevButtonStates => ({
             ...prevButtonStates,
             [id]: true
         }));
     }
 
-    // 平日リストと休日リストの出しわけ
+    // useEffect
     useEffect(() => {
         filterList()
-        console.log(buttonStates)
     }, [isWeekday, props.pointList, buttonStates]);
 
+    // 平日リストと休日リストの出しわけ
     function filterList() {
         let filteredList = [];
         if (isWeekday) {
