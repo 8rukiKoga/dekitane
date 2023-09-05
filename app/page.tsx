@@ -1,4 +1,4 @@
-import { Top } from "./pages/top/Top";
+import { Top } from "./top";
 
 export default function Home() {
   return (

@@ -1,7 +1,7 @@
 'use client'
 
 import styles from './pointList.module.css'
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
 
 import { useEffect, useState } from 'react';
 
@@ -13,9 +13,33 @@ export function PointList(props: any) {
     const initialButtonStates: Record<string, boolean> = {};
     const [buttonStates, setButtonStates] = useState(initialButtonStates)
 
+    // useEffect
+    useEffect(() => {
+        filterList()
+    }, [isWeekday, props.list, buttonStates]);
+
+    // 平日リストと休日リストの出しわけ
+    function filterList() {
+        let filteredList = [];
+        if (isWeekday) {
+            filteredList = props.list.filter((data: any) => {
+                return data.is_weekday == true
+            })
+        } else {
+            filteredList = props.list.filter((data: any) => {
+                return data.is_weekday == false
+            })
+        }
+        // もし前のバージョンと違う点があれば更新
+        if (filteredPointList != filteredList) {
+            setFilteredPointList(filteredList)
+        }
+    }
+
     // 達成ボタンを押した時
     function handleClick(data: any) {
         addPoint(data.point)
+        saveLog(data.name)
         completeTask(data.id)
     }
 
@@ -51,34 +75,20 @@ export function PointList(props: any) {
             return false
         }
     }
-    function updateButtonStates(id:string) {
+    function updateButtonStates(id: string) {
         setButtonStates(prevButtonStates => ({
             ...prevButtonStates,
             [id]: true
         }));
     }
 
-    // useEffect
-    useEffect(() => {
-        filterList()
-    }, [isWeekday, props.pointList, buttonStates]);
-
-    // 平日リストと休日リストの出しわけ
-    function filterList() {
-        let filteredList = [];
-        if (isWeekday) {
-            filteredList = props.pointList.filter((data: any) => {
-                return data.is_weekday == true
-            })
-        } else {
-            filteredList = props.pointList.filter((data: any) => {
-                return data.is_weekday == false
-            })
-        }
-        // もし前のバージョンと違う点があれば更新
-        if (filteredPointList != filteredList) {
-            setFilteredPointList(filteredList)
-        }
+    // ログ保存
+    async function saveLog(name: string) {
+        const logCollectionRef = collection(doc(props.db, "users", "shcNXJpe5y5iHyYnpNdV"), "log");
+        await addDoc(logCollectionRef, {
+            point_name: name,
+            get_date: serverTimestamp()
+        });
     }
 
     return (

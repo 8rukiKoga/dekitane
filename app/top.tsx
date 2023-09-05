@@ -1,19 +1,23 @@
 'use client'
 
-import firebaseConfig from '../../../lib/firebase'
+import firebaseConfig from '@/lib/firebase';
 
 import { useEffect, useState } from 'react';
-import styles from './top.module.css'
+import styles from './css/top.module.css'
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, getDocs, getDoc, setDoc, Firestore, updateDoc } from 'firebase/firestore';
 
-import { PointList } from '../../components/PointList/PointList';
+import { PointList } from '@/app/components/PointList/PointList';
+import { LogList } from './components/PointList/LogList/LogList';
+
+import { formatDate } from './helpers/formatDate';
 
 export function Top() {
   // 状態変数宣言
   const [totalPoint, setTotalPoint] = useState(0);
-  const [pointList, setPointList] = useState([]);
+  const [list, setList] = useState([]);
+  const [showingPointList, setShowingPointList] = useState(true)
 
   // firebase初期化
   const app = initializeApp(firebaseConfig);
@@ -37,7 +41,35 @@ export function Top() {
       const dataWithId = { ...doc.data(), id };
       allPoints.push(dataWithId);
     });
-    setPointList(allPoints)
+    setList(allPoints)
+    setShowingPointList(true)
+  }
+
+  // ログリスト取得
+  async function getLog() {
+    const logs: any = [];
+    try {
+      const docRef = doc(db, "users", "shcNXJpe5y5iHyYnpNdV");
+      const collectionRef = collection(docRef, "log");
+      // logコレクション内のすべてのドキュメントを取得
+      const querySnapshot = await getDocs(collectionRef);
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data()
+        // ドキュメントデータ内にidを含めて取得
+        const id = doc.id;
+        const nextObj: any = { ...data, id };
+
+        const formattedDate = formatDate(data.get_date.toDate())
+        nextObj.formattedDate = formattedDate
+
+        logs.push(nextObj)
+      });
+      setList(logs);
+      setShowingPointList(false)
+    } catch (error) {
+      console.error("データを取得できませんでした: ", error);
+    }
   }
 
   // トータルポイント取得
@@ -67,8 +99,11 @@ export function Top() {
           <p>たまったポイント：<span className={styles.totalPoint}>{totalPoint}</span></p>
         </div>
 
-        {/* ポイント獲得表 */}
-        <PointList db={db} totalPoint={totalPoint} setTotalPoint={setTotalPoint} pointList={pointList} />
+                {/* 履歴に切り替え */}
+                {showingPointList ? <button onClick={()=>getLog()} className={styles.toggleButton}>あゆみ</button> : <button onClick={()=>getPointList()} className={styles.toggleButton}>リストに戻る</button>}
+
+        {/* リスト */}
+        {showingPointList ? <PointList db={db}totalPoint={totalPoint} setTotalPoint={setTotalPoint} list={list} /> : <LogList db={db} list={list} />}
       </main>
     </>
   );
