@@ -39,7 +39,7 @@ export function PointList(props: any) {
     // 達成ボタンを押した時
     function handleClick(data: any) {
         addPoint(data.point)
-        saveLog(data.name)
+        saveLog(data.name, data.point)
         completeTask(data.id)
     }
 
@@ -83,10 +83,11 @@ export function PointList(props: any) {
     }
 
     // ログ保存
-    async function saveLog(name: string) {
+    async function saveLog(name:string, point:number) {
         const logCollectionRef = collection(doc(props.db, "users", "shcNXJpe5y5iHyYnpNdV"), "log");
         await addDoc(logCollectionRef, {
             point_name: name,
+            point: point,
             get_date: serverTimestamp()
         });
     }
