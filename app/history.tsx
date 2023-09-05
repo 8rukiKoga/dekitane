@@ -2,8 +2,6 @@
 
 import styles from './css/history.module.css'
 import { useEffect, useState } from "react";
-import { collection, doc, getDocs } from "firebase/firestore";
-import { formatDate } from "../helpers/formatDate";
 
 export function History(props: any) {
     const [logList, setLogList] = useState([]);
@@ -11,9 +9,7 @@ export function History(props: any) {
     useEffect(() => {
         // getLog();
     }, []);
-
-
-
+    
     return (
         <div className={styles.pointList}>
             <ul>
