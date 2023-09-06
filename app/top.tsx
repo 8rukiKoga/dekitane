@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import styles from './css/top.module.css'
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, getDocs, getDoc, setDoc, Firestore, updateDoc, query, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, doc, getDocs, getDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 
 import { PointList } from '@/app/components/PointList/PointList';
 import { LogList } from './components/PointList/LogList/LogList';
@@ -15,7 +15,9 @@ import { formatDate } from './helpers/formatDate';
 
 export function Top() {
   // 状態変数宣言
+  const [todayTotalPoint, setTodayTotalPoint] = useState(0);
   const [totalPoint, setTotalPoint] = useState(0);
+
   const [list, setList] = useState([]);
   const [showingPointList, setShowingPointList] = useState(true)
 
@@ -34,15 +36,22 @@ export function Top() {
     const allPoints: any = [];
     // コレクション内のすべてのドキュメントを取得
     const querySnapshot = await getDocs(collection(db, "point"));
+    
+    let tmpPointCounter = 0
 
     querySnapshot.forEach((doc) => {
       // ドキュメントデータ内にidを含めて取得
       const id = doc.id;
       const dataWithId = { ...doc.data(), id };
       allPoints.push(dataWithId);
+      // 今日の獲得ポイント計算
+      if (formatDate(doc.data().last_get_date.toDate()) == formatDate(new Date)) {
+        tmpPointCounter += doc.data().point
+      }
     });
     setList(allPoints)
     setShowingPointList(true)
+    setTodayTotalPoint(tmpPointCounter)
   }
 
   // ログリスト取得
@@ -96,14 +105,14 @@ export function Top() {
       <main>
         {/* 今日溜まったポイント */}
         <div className={styles.pointHeadline}>
-          <p>たまったポイント：<span className={styles.totalPoint}>{totalPoint}</span></p>
+          {showingPointList ? <p>今日貯めたポイント：<span className={styles.totalPoint}>{todayTotalPoint}</span></p> : <p>これまで貯めたポイント：<span className={styles.totalPoint}>{totalPoint}</span></p>}
         </div>
 
                 {/* 履歴に切り替え */}
                 {showingPointList ? <button onClick={()=>getLog()} className={styles.toggleButton}>りれき</button> : <button onClick={()=>getPointList()} className={styles.toggleButton}>リストに戻る</button>}
 
         {/* リスト */}
-        {showingPointList ? <PointList db={db}totalPoint={totalPoint} setTotalPoint={setTotalPoint} list={list} /> : <LogList db={db} list={list} />}
+        {showingPointList ? <PointList db={db} totalPoint={totalPoint} setTotalPoint={setTotalPoint} todayTotalPoint={todayTotalPoint} setTodayTotalPoint={setTodayTotalPoint} list={list} /> : <LogList db={db} list={list} />}
       </main>
     </>
   );

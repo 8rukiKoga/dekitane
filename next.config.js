@@ -13,3 +13,12 @@ module.exports = {
         FIREBASE_APP_ID: "1:75951588975:web:92284b7b7bdf6e984c2f9a",
     },
 }
+
+// module.exports = {
+//     typescript: {
+//       // !! 警告 !!
+//       // あなたのプロジェクトに型エラーがあったとしても、プロダクションビルドを正常に完了するために危険な許可をする。
+//       // !! 警告 !!
+//       ignoreBuildErrors: true
+//     }
+//   };

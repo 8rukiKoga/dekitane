@@ -46,11 +46,13 @@ export function PointList(props: any) {
     // ポイント加算
     async function addPoint(point: number) {
         const docRef = doc(props.db, "users", "shcNXJpe5y5iHyYnpNdV");
+        const nextTodayTotalPoint = props.todayTotalPoint + point
         const nextTotalPoint = props.totalPoint + point;
 
         await updateDoc(docRef, {
             total_point: nextTotalPoint
         })
+        props.setTodayTotalPoint(nextTodayTotalPoint)
         props.setTotalPoint(nextTotalPoint)
     }
 
