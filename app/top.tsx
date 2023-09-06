@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import styles from './css/top.module.css'
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, getDocs, getDoc, setDoc, Firestore, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, Firestore, updateDoc, query, orderBy } from 'firebase/firestore';
 
 import { PointList } from '@/app/components/PointList/PointList';
 import { LogList } from './components/PointList/LogList/LogList';
@@ -52,7 +52,7 @@ export function Top() {
       const docRef = doc(db, "users", "shcNXJpe5y5iHyYnpNdV");
       const collectionRef = collection(docRef, "log");
       // logコレクション内のすべてのドキュメントを取得
-      const querySnapshot = await getDocs(collectionRef);
+      const querySnapshot = await getDocs(query(collectionRef, orderBy("get_date", "desc")));
 
       querySnapshot.forEach((doc) => {
         const data = doc.data()
@@ -100,7 +100,7 @@ export function Top() {
         </div>
 
                 {/* 履歴に切り替え */}
-                {showingPointList ? <button onClick={()=>getLog()} className={styles.toggleButton}>あゆみ</button> : <button onClick={()=>getPointList()} className={styles.toggleButton}>リストに戻る</button>}
+                {showingPointList ? <button onClick={()=>getLog()} className={styles.toggleButton}>りれき</button> : <button onClick={()=>getPointList()} className={styles.toggleButton}>リストに戻る</button>}
 
         {/* リスト */}
         {showingPointList ? <PointList db={db}totalPoint={totalPoint} setTotalPoint={setTotalPoint} list={list} /> : <LogList db={db} list={list} />}
